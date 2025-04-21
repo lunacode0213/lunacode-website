@@ -1,1 +1,40 @@
-<!-- 고객 입력용 HTML - 복원 버전 -->
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <title>고객 사주 입력</title>
+  <script type="module" src="./saju_ganji_logic_FINAL.js"></script>
+  <script type="module" src="./sipsung_basis.js"></script>
+  <script type="module" src="./js_saju_core_functions.js"></script>
+</head>
+<body>
+  <h2>🌙 고객 사주 입력</h2>
+  <input id="name" placeholder="이름"><br/>
+  <input id="gender" placeholder="성별"><br/>
+  <input id="calendar" placeholder="양력/음력"><br/>
+  <input id="birth-year" placeholder="YYYY">
+  <input id="birth-month" placeholder="MM">
+  <input id="birth-day" placeholder="DD"><br/>
+  <input id="hour" placeholder="HH">
+  <input id="minute" placeholder="MM"><br/>
+  <button onclick="saveData()">💾 저장 및 결과 보기</button>
+
+  <script type="module">
+    window.saveData = function () {
+      const name = document.getElementById("name").value;
+      const gender = document.getElementById("gender").value;
+      const calendar = document.getElementById("calendar").value;
+      const birthdate = document.getElementById("birth-year").value + '-' +
+                        document.getElementById("birth-month").value.padStart(2, '0') + '-' +
+                        document.getElementById("birth-day").value.padStart(2, '0');
+      const birthtime = document.getElementById("hour").value.padStart(2, '0') + ':' +
+                        document.getElementById("minute").value.padStart(2, '0');
+
+      const data = { name, gender, calendar, birthdate, birthtime };
+      localStorage.setItem("client-records", JSON.stringify([data]));
+      window.open("manselag-summary-리딩요약최종.html", "_blank");
+    };
+  </script>
+</body>
+</html>
