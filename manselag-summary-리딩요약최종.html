@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>명리 만세력 요약 리딩</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 40px; }
+    .card { background: white; border: 1px solid #ccc; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    table { width: 100%; text-align: center; border-collapse: collapse; margin-top: 20px; }
+    td, th { padding: 10px; border: 1px solid #ccc; }
+    .god { font-weight: bold; color: #444; }
+  </style>
+</head>
+<body>
+  <div id="dynamic"></div>
+
+  <script type="module">
+    import {
+      getYearGanjiAccurate,
+      getMonthGanji,
+      getDayGanjiIndex,
+      getDayGanji,
+      getHourGanji
+    } from './saju_ganji_logic_FINAL.js';
+
+    import {
+      tenGodMapByDayStem,
+      tenGodEarthMapByDayStem,
+      hiddenStems
+    } from './sipsung_basis.js';
+
+    window.onload = function () {
+      const record = JSON.parse(localStorage.getItem("client-records") || "[]").slice(-1)[0];
+      if (!record) return;
+
+      const birth = {
+        year: parseInt(record.birthdate.split("-")[0]),
+        month: parseInt(record.birthdate.split("-")[1]),
+        day: parseInt(record.birthdate.split("-")[2]),
+        hour: parseInt(record.birthtime.split(":")[0]),
+        minute: parseInt(record.birthtime.split(":")[1])
+      };
+
+      const [yearGan, yearJi] = getYearGanjiAccurate(birth.year, birth.month, birth.day, birth.hour, birth.minute);
+      const [monthGan, monthJi] = getMonthGanji(yearGan, birth.month, birth.day);
+      const index = getDayGanjiIndex(birth.year, birth.month, birth.day);
+      const [dayGan, dayJi] = getDayGanji(index);
+      const [hourGan, hourJi] = getHourGanji(dayGan, birth.hour, birth.minute);
+
+      const heavenly = [hourGan, dayGan, monthGan, yearGan];
+      const earthly = [hourJi, dayJi, monthJi, yearJi];
+
+      const ganTg = heavenly.map(g => tenGodMapByDayStem[dayGan]?.[g] || "-");
+      const jiTg = earthly.map(j => tenGodEarthMapByDayStem[dayGan]?.[j] || "-");
+
+      const jijanggan = earthly.map(j => {
+        const stems = hiddenStems[j] || [];
+        return stems.map(obj => {
+          const tg = tenGodMapByDayStem[dayGan]?.[obj.stem] || "-";
+          return obj.stem + "(" + tg + ")";
+        }).join("<br/>");
+      });
+
+      document.getElementById("dynamic").innerHTML = `
+        <div class="card">
+          <h3>🌟 자동 생성된 사주 + 십성 매핑</h3>
+          <table>
+            <tr><th>항목</th><th>시주</th><th>일주</th><th>월주</th><th>연주</th></tr>
+            <tr><td>십성 (천간)</td><td>${ganTg[0]}</td><td>${ganTg[1]}</td><td>${ganTg[2]}</td><td>${ganTg[3]}</td></tr>
+            <tr><td>천간</td><td>${heavenly[0]}</td><td>${heavenly[1]}</td><td>${heavenly[2]}</td><td>${heavenly[3]}</td></tr>
+            <tr><td>지지</td><td>${earthly[0]}</td><td>${earthly[1]}</td><td>${earthly[2]}</td><td>${earthly[3]}</td></tr>
+            <tr><td>십성 (지지)</td><td>${jiTg[0]}</td><td>${jiTg[1]}</td><td>${jiTg[2]}</td><td>${jiTg[3]}</td></tr>
+            <tr><td>지장간 + 십성</td><td>${jijanggan[0]}</td><td>${jijanggan[1]}</td><td>${jijanggan[2]}</td><td>${jijanggan[3]}</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>1. 기본 정보</h3>
+          <p><strong>이름:</strong> ${record.name} / ${record.calendar} / ${record.birthdate} / ${record.gender}</p>
+        </div>`;
+    };
+  </script>
+</body>
+</html>
